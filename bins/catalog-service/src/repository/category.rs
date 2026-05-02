@@ -18,7 +18,10 @@ impl CategoryRepository {
             .await
     }
 
-    pub async fn create_category(&self, req: CreateCategoryRequest) -> Result<Category, sqlx::Error> {
+    pub async fn create_category(
+        &self,
+        req: CreateCategoryRequest,
+    ) -> Result<Category, sqlx::Error> {
         sqlx::query_as!(
             Category,
             "INSERT INTO categories (name) VALUES ($1) RETURNING *",
