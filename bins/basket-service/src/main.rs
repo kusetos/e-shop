@@ -1,29 +1,34 @@
-fn main() {
-    println!("Hello, world!");
-}
-use axum::{extract::Path, http::StatusCode, response::IntoResponse};
+use std::sync::Arc;
 
-// GET  /basket/:user_id        — получить корзину пользователя
-pub async fn get_basket(Path(user_id): Path<String>) -> impl IntoResponse {
-    (StatusCode::OK, format!("get basket for {}", user_id))
-}
+use crate::repository::BasketRepository;
 
-// POST /basket/:user_id        — добавить товар в корзину
-pub async fn add_to_basket(Path(user_id): Path<String>) -> impl IntoResponse {
-    (StatusCode::OK, format!("add to basket for {}", user_id))
-}
-
-// DELETE /basket/:user_id      — очистить корзину
-pub async fn clear_basket(Path(user_id): Path<String>) -> impl IntoResponse {
-    (StatusCode::OK, format!("clear basket for {}", user_id))
+mod error;
+mod handlers;
+mod models;
+mod repository;
+mod routes;
+#[derive(Clone)]
+pub struct AppState {
+    pub basket_repo: Arc<BasketRepository>,
 }
 
-// DELETE /basket/:user_id/:product_id  — удалить один товар
-pub async fn remove_product(
-    Path((user_id, product_id)): Path<(String, String)>,
-) -> impl IntoResponse {
-    (
-        StatusCode::OK,
-        format!("remove product {} from basket {}", product_id, user_id),
-    )
+#[tokio::main]
+async fn main() {
+    dotenvy::dotenv().ok();
+    tracing_subscriber::fmt::init();
+
+    let redis_url = std::env::var("REDIS_URL").unwrap();
+
+    let client = redis::Client::open(redis_url).expect("Failed to create Redis client");
+    let basket_repo = Arc::new(BasketRepository::new(client));
+    let state = AppState {
+        basket_repo: basket_repo,
+    };
+
+    let app = routes::create_router(state);
+
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3001").await.unwrap();
+
+    tracing::info!("🛒 Basket service running on http://localhost:3001");
+    axum::serve(listener, app).await.unwrap();
 }
