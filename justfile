@@ -13,3 +13,9 @@ db-open:
 
 db-stop:
     docker-compose stop postgres
+
+redis-run:
+    docker-compose up -d redis
+
+redis-stop:
+    docker-compose stop redis

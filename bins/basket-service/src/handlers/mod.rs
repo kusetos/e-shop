@@ -18,7 +18,10 @@ pub async fn get_basket(
             "items": basket.items,
             "total": basket.total()
         }))),
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        Err(e) => {
+            tracing::error!("get_basket error: {e}");
+            Err(StatusCode::INTERNAL_SERVER_ERROR)
+        }
     }
 }
 
@@ -34,7 +37,10 @@ pub async fn add_item(
             "items": basket.items,
             "total": basket.total()
         }))),
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        Err(e) => {
+            tracing::error!("add_item error: {e}");
+            Err(StatusCode::INTERNAL_SERVER_ERROR)
+        }
     }
 }
 
@@ -45,7 +51,10 @@ pub async fn clear_basket(
 ) -> Result<StatusCode, StatusCode> {
     match state.basket_repo.clear(user_id).await {
         Ok(_) => Ok(StatusCode::NO_CONTENT),
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        Err(e) => {
+            tracing::error!("clear_basket error: {e}");
+            Err(StatusCode::INTERNAL_SERVER_ERROR)
+        }
     }
 }
 
@@ -60,6 +69,9 @@ pub async fn remove_item(
             "items": basket.items,
             "total": basket.total()
         }))),
-        Err(_) => Err(StatusCode::INTERNAL_SERVER_ERROR),
+        Err(e) => {
+            tracing::error!("remove_item error: {e}");
+            Err(StatusCode::INTERNAL_SERVER_ERROR)
+        }
     }
 }
