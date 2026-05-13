@@ -3,7 +3,7 @@ hi:
 
 db-reload:
     docker-compose stop postgres
-    docker compose up -d postgres
+    docker-compose up postgres
     sqlx database drop
     sqlx database create
     sqlx migrate run
