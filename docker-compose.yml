@@ -9,6 +9,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U eshop -d catalog"]
       interval: 5s
@@ -19,6 +20,12 @@ services:
     command: redis-server --requirepass secret --appendonly yes
     ports:
       - "6379:6379"
+    volumes:
+      - cache_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "secret", "ping"]
+      interval: 5s
+      retries: 5
 
   catalog-service:
     build:
@@ -31,6 +38,60 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+  basket-service:
+    build:
+      context: .
+      dockerfile: bins/basket-service/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      REDIS_URL: redis://:secret@redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  ordering-service:
+    build:
+      context: .
+      dockerfile: bins/ordering-service/Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      ORDERING_DATABASE_URL: postgres://eshop:eshop@postgres:5432/ordering
+      KAFKA_BROKERS: kafka:29092
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
 
 volumes:
   postgres_data:

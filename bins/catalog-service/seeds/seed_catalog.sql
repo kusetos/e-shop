@@ -1,4 +1,3 @@
--- Add migration script here
 -- Сначала категории
 INSERT INTO categories (name) VALUES
     ('Электроника'),
