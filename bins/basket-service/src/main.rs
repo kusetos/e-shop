@@ -17,7 +17,8 @@ async fn main() {
     dotenvy::dotenv().ok();
     tracing_subscriber::fmt::init();
 
-    let redis_url = std::env::var("REDIS_URL").unwrap();
+    let redis_url = std::env::var("REDIS_URL")
+        .expect("REDIS_URL must be set in environment");
 
     let client = redis::Client::open(redis_url).expect("Failed to create Redis client");
     let basket_repo = Arc::new(BasketRepository::new(client));

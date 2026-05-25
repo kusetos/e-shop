@@ -34,7 +34,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: postgres://eshop:eshop@postgres:5432/catalog
+      CATALOG_DATABASE_URL: postgres://eshop:eshop@postgres:5432/catalog
     depends_on:
       postgres:
         condition: service_healthy

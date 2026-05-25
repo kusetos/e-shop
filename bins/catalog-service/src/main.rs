@@ -20,6 +20,8 @@ struct AppState {
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().ok();
+    tracing_subscriber::fmt::init();
+
     let pool = create_pool().await;
     let product_repo = ProductRepository::new(pool.clone());
     let category_repo = CategoryRepository::new(pool);
@@ -33,7 +35,7 @@ async fn main() {
     );
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
-    println!("Server running on http://{addr}");
+    tracing::info!("Catalog service running on http://{addr}");
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
