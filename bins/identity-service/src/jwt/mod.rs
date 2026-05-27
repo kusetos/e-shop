@@ -1,9 +1,9 @@
 use async_trait::async_trait;
 use axum::{
     extract::FromRequestParts,
-    http::{StatusCode, header::AUTHORIZATION, request::Parts},
+    http::{header::AUTHORIZATION, request::Parts, StatusCode},
 };
-use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation, decode, encode};
+use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
 use crate::error::AuthError;
@@ -35,7 +35,7 @@ pub fn encode_jwt(user_id: i32, email: &str, secret: &str) -> Result<String, Aut
     .map_err(|_| AuthError::TokenCreation)
 }
 
-pub fn decode_jwt(token: &str, secret: &str) -> Result<Claims, AuthError> {
+pub fn decode_jwt(token: &str, secret: &str) -> crate::error::Result<Claims> {
     decode::<Claims>(
         token,
         &DecodingKey::from_secret(secret.as_bytes()),
@@ -63,8 +63,7 @@ where
             .strip_prefix("Bearer ")
             .ok_or(StatusCode::UNAUTHORIZED)?;
 
-        let secret = std::env::var("JWT_SECRET")
-            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+        let secret = std::env::var("JWT_SECRET").map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
         decode_jwt(token, &secret).map_err(|_| StatusCode::UNAUTHORIZED)
     }
