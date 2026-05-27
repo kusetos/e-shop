@@ -1,1 +1,2 @@
 CREATE DATABASE ordering;
+CREATE DATABASE identity;
