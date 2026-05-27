@@ -25,9 +25,13 @@ ordering-migrate:
 
 catalog-sqlx-prepare:
     cd bins/catalog-service && DATABASE_URL=postgres://eshop:eshop@localhost:5432/catalog cargo sqlx prepare
+    DATABASE_URL=postgres://eshop:eshop@localhost:5432/catalog cargo sqlx prepare --workspace -- --bin catalog-service
+    cp bins/ordering-service/.sqlx/* .sqlx/
 
 ordering-sqlx-prepare:
     cd bins/ordering-service && DATABASE_URL=postgres://eshop:eshop@localhost:5432/ordering cargo sqlx prepare
+    DATABASE_URL=postgres://eshop:eshop@localhost:5432/catalog cargo sqlx prepare --workspace -- --bin catalog-service
+    cp bins/ordering-service/.sqlx/* .sqlx/
 
 check:
     SQLX_OFFLINE=true cargo check --workspace
