@@ -23,6 +23,15 @@ catalog-seed:
 ordering-migrate:
     DATABASE_URL=postgres://eshop:eshop@localhost:5432/ordering sqlx migrate run --source bins/ordering-service/migrations
 
+catalog-sqlx-prepare:
+    cd bins/catalog-service && DATABASE_URL=postgres://eshop:eshop@localhost:5432/catalog cargo sqlx prepare
+
+ordering-sqlx-prepare:
+    cd bins/ordering-service && DATABASE_URL=postgres://eshop:eshop@localhost:5432/ordering cargo sqlx prepare
+
+check:
+    SQLX_OFFLINE=true cargo check --workspace
+
 catalog-db-open:
     harlequin -a postgres "postgres://eshop:eshop@localhost:5432/catalog"
 

@@ -21,7 +21,7 @@
       {
         "ordinal": 3,
         "name": "price",
-        "type_info": "Float8"
+        "type_info": "Numeric"
       },
       {
         "ordinal": 4,
@@ -37,13 +37,18 @@
         "ordinal": 6,
         "name": "category_id",
         "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamp"
       }
     ],
     "parameters": {
       "Left": [
         "Text",
         "Text",
-        "Float8",
+        "Numeric",
         "Int4",
         "Text",
         "Int4",
@@ -51,6 +56,7 @@
       ]
     },
     "nullable": [
+      false,
       false,
       false,
       false,

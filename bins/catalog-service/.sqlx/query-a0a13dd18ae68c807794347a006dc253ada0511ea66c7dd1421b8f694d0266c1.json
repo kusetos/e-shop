@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT * FROM categories ORDER BY id",
+  "query": "INSERT INTO categories (name) VALUES ($1) RETURNING *",
   "describe": {
     "columns": [
       {
@@ -12,15 +12,23 @@
         "ordinal": 1,
         "name": "name",
         "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "created_at",
+        "type_info": "Timestamp"
       }
     ],
     "parameters": {
-      "Left": []
+      "Left": [
+        "Text"
+      ]
     },
     "nullable": [
+      false,
       false,
       false
     ]
   },
-  "hash": "88bf3a9d37f0e950d04f87165cb214750257f8d1e3eac1f5dff06d64b0023495"
+  "hash": "a0a13dd18ae68c807794347a006dc253ada0511ea66c7dd1421b8f694d0266c1"
 }

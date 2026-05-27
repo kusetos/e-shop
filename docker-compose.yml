@@ -59,6 +59,7 @@ services:
       - "3002:3002"
     environment:
       ORDERING_DATABASE_URL: postgres://eshop:eshop@postgres:5432/ordering
+      CATALOG_SERVICE_URL: http://catalog-service:3000
       KAFKA_BROKERS: kafka:29092
     depends_on:
       postgres:

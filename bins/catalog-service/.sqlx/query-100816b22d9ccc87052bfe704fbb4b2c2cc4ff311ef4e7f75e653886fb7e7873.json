@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT * FROM products WHERE id = $1",
+  "query": "INSERT INTO products (name, description, price, stock, image_url, category_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
   "describe": {
     "columns": [
       {
@@ -21,7 +21,7 @@
       {
         "ordinal": 3,
         "name": "price",
-        "type_info": "Float8"
+        "type_info": "Numeric"
       },
       {
         "ordinal": 4,
@@ -37,10 +37,20 @@
         "ordinal": 6,
         "name": "category_id",
         "type_info": "Int4"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamp"
       }
     ],
     "parameters": {
       "Left": [
+        "Text",
+        "Text",
+        "Numeric",
+        "Int4",
+        "Text",
         "Int4"
       ]
     },
@@ -51,8 +61,9 @@
       false,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "33de585f492d980dd6fc2420352233a03fdc6ed226fdb338a31601f906805454"
+  "hash": "100816b22d9ccc87052bfe704fbb4b2c2cc4ff311ef4e7f75e653886fb7e7873"
 }

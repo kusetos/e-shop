@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT * FROM products WHERE category_id = $1 ORDER BY id",
+  "query": "SELECT * FROM order_items WHERE order_id = $1 ORDER BY id",
   "describe": {
     "columns": [
       {
@@ -10,32 +10,27 @@
       },
       {
         "ordinal": 1,
+        "name": "order_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 2,
+        "name": "product_id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 3,
         "name": "name",
         "type_info": "Text"
       },
       {
-        "ordinal": 2,
-        "name": "description",
-        "type_info": "Text"
-      },
-      {
-        "ordinal": 3,
-        "name": "price",
-        "type_info": "Float8"
-      },
-      {
         "ordinal": 4,
-        "name": "stock",
-        "type_info": "Int4"
+        "name": "price",
+        "type_info": "Numeric"
       },
       {
         "ordinal": 5,
-        "name": "image_url",
-        "type_info": "Text"
-      },
-      {
-        "ordinal": 6,
-        "name": "category_id",
+        "name": "quantity",
         "type_info": "Int4"
       }
     ],
@@ -50,9 +45,8 @@
       false,
       false,
       false,
-      false,
       false
     ]
   },
-  "hash": "ad49fea24f21783516cf1f2df5abac4beca4d19a4b43cce45d33f410672c2128"
+  "hash": "6395bc855ad3887eee29bc7cef0f103f88713eca9bc3f976d98e66203e668595"
 }
