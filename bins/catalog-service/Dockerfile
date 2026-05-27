@@ -5,7 +5,6 @@ WORKDIR /app
 COPY Cargo.toml Cargo.lock ./
 COPY bins/catalog-service bins/catalog-service
 COPY crates crates
-COPY .sqlx .sqlx
 
 ENV SQLX_OFFLINE=true
 RUN cargo build --release --bin catalog-service
