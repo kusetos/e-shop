@@ -51,6 +51,19 @@ services:
       redis:
         condition: service_healthy
 
+  identity-service:
+    build:
+      context: .
+      dockerfile: bins/identity-service/Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      IDENTITY_DATABASE_URL: postgres://eshop:eshop@postgres:5432/identity
+      JWT_SECRET: change-this-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   ordering-service:
     build:
       context: .
