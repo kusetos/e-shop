@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, user_id, status AS \"status: OrderStatus\", total, created_at\n               FROM orders WHERE id = $1",
+  "query": "UPDATE orders SET status = $1 WHERE id = $2\n               RETURNING id, user_id, status AS \"status: OrderStatus\", total, created_at",
   "describe": {
     "columns": [
       {
@@ -42,6 +42,18 @@
     ],
     "parameters": {
       "Left": [
+        {
+          "Custom": {
+            "name": "order_status",
+            "kind": {
+              "Enum": [
+                "Pending",
+                "Confirmed",
+                "Cancelled"
+              ]
+            }
+          }
+        },
         "Int4"
       ]
     },
@@ -53,5 +65,5 @@
       false
     ]
   },
-  "hash": "2c706b07fcfe3579ad92bc1b7295260084a38da69a4d0fa3db5a00d8ed3a0c15"
+  "hash": "1a41aa10fc9b29384431c38ad7abcfa6109dfa3fbc93a7aeeb423dec5f52c262"
 }

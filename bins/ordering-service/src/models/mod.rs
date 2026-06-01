@@ -50,6 +50,11 @@ pub struct OrderItemRequest {
     pub quantity: i32,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct UpdateStatusRequest {
+    pub status: OrderStatus,
+}
+
 // Internal: after price verification against catalog-service
 pub struct VerifiedItem {
     pub product_id: i32,

@@ -1,11 +1,12 @@
 // models/basket.rs
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BasketItem {
     pub product_id: i32,
     pub name: String,
-    pub price: f64,
+    pub price: Decimal,
     pub quantity: i32,
 }
 
@@ -23,10 +24,10 @@ impl Basket {
         }
     }
 
-    pub fn total(&self) -> f64 {
+    pub fn total(&self) -> Decimal {
         self.items
             .iter()
-            .map(|item| item.price * item.quantity as f64)
+            .map(|item| item.price * Decimal::from(item.quantity))
             .sum()
     }
 }
@@ -35,6 +36,6 @@ impl Basket {
 pub struct AddItemRequest {
     pub product_id: i32,
     pub name: String,
-    pub price: f64,
+    pub price: Decimal,
     pub quantity: i32,
 }

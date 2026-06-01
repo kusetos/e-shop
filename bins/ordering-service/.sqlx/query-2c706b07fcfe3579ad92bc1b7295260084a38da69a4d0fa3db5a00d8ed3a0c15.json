@@ -20,7 +20,11 @@
           "Custom": {
             "name": "order_status",
             "kind": {
-              "Enum": ["Pending", "Confirmed", "Cancelled"]
+              "Enum": [
+                "Pending",
+                "Confirmed",
+                "Cancelled"
+              ]
             }
           }
         }
@@ -37,9 +41,17 @@
       }
     ],
     "parameters": {
-      "Left": ["Int4"]
+      "Left": [
+        "Int4"
+      ]
     },
-    "nullable": [false, false, false, false, false]
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
   },
   "hash": "2c706b07fcfe3579ad92bc1b7295260084a38da69a4d0fa3db5a00d8ed3a0c15"
 }

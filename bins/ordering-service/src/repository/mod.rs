@@ -76,6 +76,35 @@ impl OrderRepository {
         .map_err(OrderError::from)
     }
 
+    pub async fn update_status(&self, id: i32, new_status: OrderStatus) -> Result<Order> {
+        let order = self
+            .get_order_by_id(id)
+            .await?
+            .ok_or(OrderError::NotFound)?;
+
+        let allowed = matches!(
+            (&order.status, &new_status),
+            (OrderStatus::Pending, OrderStatus::Confirmed)
+                | (OrderStatus::Pending, OrderStatus::Cancelled)
+                | (OrderStatus::Confirmed, OrderStatus::Cancelled)
+        );
+
+        if !allowed {
+            return Err(OrderError::InvalidStatusTransition);
+        }
+
+        sqlx::query_as!(
+            Order,
+            r#"UPDATE orders SET status = $1 WHERE id = $2
+               RETURNING id, user_id, status AS "status: OrderStatus", total, created_at"#,
+            new_status as OrderStatus,
+            id
+        )
+        .fetch_one(&self.pool)
+        .await
+        .map_err(OrderError::from)
+    }
+
     pub async fn list_by_user_id(&self, user_id: i32) -> Result<Vec<Order>> {
         sqlx::query_as!(
             Order,

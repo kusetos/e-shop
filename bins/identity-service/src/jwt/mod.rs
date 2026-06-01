@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
 use axum::{
     extract::FromRequestParts,
@@ -6,7 +8,7 @@ use axum::{
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
-use crate::error::AuthError;
+use crate::{AppState, error::AuthError};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Claims {
@@ -46,13 +48,13 @@ pub fn decode_jwt(token: &str, secret: &str) -> crate::error::Result<Claims> {
 }
 
 #[async_trait]
-impl<S> FromRequestParts<S> for Claims
-where
-    S: Send + Sync,
-{
+impl FromRequestParts<Arc<AppState>> for Claims {
     type Rejection = StatusCode;
 
-    async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, StatusCode> {
+    async fn from_request_parts(
+        parts: &mut Parts,
+        state: &Arc<AppState>,
+    ) -> Result<Self, StatusCode> {
         let auth_header = parts
             .headers
             .get(AUTHORIZATION)
@@ -63,8 +65,6 @@ where
             .strip_prefix("Bearer ")
             .ok_or(StatusCode::UNAUTHORIZED)?;
 
-        let secret = std::env::var("JWT_SECRET").map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-
-        decode_jwt(token, &secret).map_err(|_| StatusCode::UNAUTHORIZED)
+        decode_jwt(token, &state.jwt_secret).map_err(|_| StatusCode::UNAUTHORIZED)
     }
 }

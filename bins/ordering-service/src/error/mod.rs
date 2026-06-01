@@ -15,4 +15,7 @@ pub enum OrderError {
 
     #[error("Order not found")]
     NotFound,
+
+    #[error("Invalid status transition")]
+    InvalidStatusTransition,
 }

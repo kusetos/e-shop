@@ -13,6 +13,7 @@ use axum::{
 
 use crate::{
     AppState,
+    error::AuthError,
     jwt::{Claims, encode_jwt},
     models::{AuthResponse, LoginRequest, RegisterRequest, UserProfile},
 };
@@ -28,34 +29,20 @@ pub fn auth_router(state: Arc<AppState>) -> Router {
 async fn register(
     State(state): State<Arc<AppState>>,
     Json(req): Json<RegisterRequest>,
-) -> Result<(StatusCode, Json<AuthResponse>), StatusCode> {
-    if state
-        .user_repo
-        .find_by_email(&req.email)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .is_some()
-    {
-        return Err(StatusCode::CONFLICT);
+) -> Result<(StatusCode, Json<AuthResponse>), AuthError> {
+    if state.user_repo.find_by_email(&req.email).await?.is_some() {
+        return Err(AuthError::EmailAlreadyExists);
     }
 
     let salt = SaltString::generate(&mut OsRng);
     let hash = Argon2::default()
         .hash_password(req.password.as_bytes(), &salt)
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+        .map_err(|_| AuthError::TokenCreation)?
         .to_string();
 
-    let user = state
-        .user_repo
-        .create(&req.email, &hash)
-        .await
-        .map_err(|e| {
-            tracing::error!("register db error: {e}");
-            StatusCode::INTERNAL_SERVER_ERROR
-        })?;
+    let user = state.user_repo.create(&req.email, &hash).await?;
 
-    let token = encode_jwt(user.id, &user.email, &state.jwt_secret)
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let token = encode_jwt(user.id, &user.email, &state.jwt_secret)?;
 
     Ok((
         StatusCode::CREATED,
@@ -70,23 +57,21 @@ async fn register(
 async fn login(
     State(state): State<Arc<AppState>>,
     Json(req): Json<LoginRequest>,
-) -> Result<Json<AuthResponse>, StatusCode> {
+) -> Result<Json<AuthResponse>, AuthError> {
     let user = state
         .user_repo
         .find_by_email(&req.email)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .ok_or(StatusCode::UNAUTHORIZED)?;
+        .await?
+        .ok_or(AuthError::InvalidCredentials)?;
 
     let parsed_hash = PasswordHash::new(&user.password)
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+        .map_err(|_| AuthError::TokenCreation)?;
 
     Argon2::default()
         .verify_password(req.password.as_bytes(), &parsed_hash)
-        .map_err(|_| StatusCode::UNAUTHORIZED)?;
+        .map_err(|_| AuthError::InvalidCredentials)?;
 
-    let token = encode_jwt(user.id, &user.email, &state.jwt_secret)
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+    let token = encode_jwt(user.id, &user.email, &state.jwt_secret)?;
 
     Ok(Json(AuthResponse {
         token,
@@ -98,13 +83,12 @@ async fn login(
 async fn me(
     claims: Claims,
     State(state): State<Arc<AppState>>,
-) -> Result<Json<UserProfile>, StatusCode> {
+) -> Result<Json<UserProfile>, AuthError> {
     let user = state
         .user_repo
         .find_by_id(claims.sub)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .ok_or(StatusCode::NOT_FOUND)?;
+        .await?
+        .ok_or(AuthError::NotFound)?;
 
     Ok(Json(UserProfile {
         id: user.id,
