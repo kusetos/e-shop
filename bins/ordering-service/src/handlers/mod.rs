@@ -10,6 +10,7 @@ use rust_decimal::Decimal;
 
 use crate::{
     error::OrderError,
+    kafka::OrderCreatedEvent,
     models::{CreateOrderRequest, Order, OrderResponse, UpdateStatusRequest, VerifiedItem},
     AppState,
 };
@@ -75,6 +76,11 @@ async fn create_order(
         .get_items_by_order_id(order.id)
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+    state.producer.order_created(&OrderCreatedEvent {
+        order_id: order.id,
+        user_id:  order.user_id,
+    }).await;
 
     Ok((StatusCode::CREATED, Json(OrderResponse { order, items })))
 }

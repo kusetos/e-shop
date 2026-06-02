@@ -27,6 +27,24 @@ services:
       interval: 5s
       retries: 5
 
+  gateway:
+    build:
+      context: .
+      dockerfile: bins/gateway/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      CATALOG_SERVICE_URL: http://catalog-service:3000
+      BASKET_SERVICE_URL: http://basket-service:3001
+      ORDERING_SERVICE_URL: http://ordering-service:3002
+      IDENTITY_SERVICE_URL: http://identity-service:3003
+      JWT_SECRET: change-this-in-production
+    depends_on:
+      - catalog-service
+      - basket-service
+      - ordering-service
+      - identity-service
+
   catalog-service:
     build:
       context: .
@@ -73,8 +91,11 @@ services:
     environment:
       ORDERING_DATABASE_URL: postgres://eshop:eshop@postgres:5432/ordering
       CATALOG_SERVICE_URL: http://catalog-service:3000
+      KAFKA_BROKERS: kafka:29092
     depends_on:
       postgres:
+        condition: service_healthy
+      kafka:
         condition: service_healthy
 
   zookeeper:

@@ -41,7 +41,7 @@ sqlx-prepare:
     cd bins/catalog-service && DATABASE_URL=postgres://eshop:eshop@localhost:5432/catalog cargo sqlx prepare
     cd bins/ordering-service && DATABASE_URL=postgres://eshop:eshop@localhost:5432/ordering cargo sqlx prepare
     cd bins/identity-service && DATABASE_URL=postgres://eshop:eshop@localhost:5432/identity cargo sqlx prepare
-    DATABASE_URL=postgres://eshop:eshop@localhost:5432/catalog cargo sqlx prepare --workspace -- --bin catalog-service
+    cp bins/catalog-service/.sqlx/* .sqlx/
     cp bins/ordering-service/.sqlx/* .sqlx/
     cp bins/identity-service/.sqlx/* .sqlx/
 
