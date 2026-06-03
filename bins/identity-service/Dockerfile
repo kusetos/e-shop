@@ -1,8 +1,11 @@
 FROM rust:1.93-slim AS builder
 
+RUN apt-get update && apt-get install -y libssl-dev pkg-config && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY Cargo.toml Cargo.lock ./
+COPY .sqlx .sqlx
 COPY bins/identity-service bins/identity-service
 COPY crates crates
 
