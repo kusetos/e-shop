@@ -9,6 +9,7 @@ use crate::{
 
 mod db;
 mod handlers;
+mod kafka;
 mod models;
 mod repository;
 #[derive(Clone)]
@@ -22,9 +23,15 @@ async fn main() {
     dotenvy::dotenv().ok();
     tracing_subscriber::fmt::init();
 
+    let kafka_brokers = std::env::var("KAFKA_BROKERS")
+        .expect("KAFKA_BROKERS must be set");
+
     let pool = create_pool().await;
     let product_repo = ProductRepository::new(pool.clone());
     let category_repo = CategoryRepository::new(pool);
+
+    tokio::spawn(kafka::start_consumer(kafka_brokers, product_repo.clone()));
+
     let app_state = Arc::new(AppState {
         product_repo,
         category_repo,

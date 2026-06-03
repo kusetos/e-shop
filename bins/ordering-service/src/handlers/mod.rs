@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use axum::{
     extract::{Path, State},
-    http::StatusCode,
+    http::{HeaderMap, StatusCode},
     routing::{get, post, put},
     Json, Router,
 };
@@ -10,7 +10,7 @@ use rust_decimal::Decimal;
 
 use crate::{
     error::OrderError,
-    kafka::OrderCreatedEvent,
+    kafka::{OrderCreatedEvent, OrderCreatedItem},
     models::{CreateOrderRequest, Order, OrderResponse, UpdateStatusRequest, VerifiedItem},
     AppState,
 };
@@ -26,8 +26,15 @@ pub fn orders_router(state: Arc<AppState>) -> Router {
 
 async fn create_order(
     State(state): State<Arc<AppState>>,
+    headers: HeaderMap,
     Json(req): Json<CreateOrderRequest>,
 ) -> Result<(StatusCode, Json<OrderResponse>), StatusCode> {
+    let user_id = headers
+        .get("x-user-id")
+        .and_then(|v| v.to_str().ok())
+        .and_then(|v| v.parse::<i32>().ok())
+        .ok_or(StatusCode::UNAUTHORIZED)?;
+
     if req.items.is_empty() {
         return Err(StatusCode::UNPROCESSABLE_ENTITY);
     }
@@ -47,6 +54,10 @@ async fn create_order(
                 _ => StatusCode::BAD_GATEWAY,
             })?;
 
+        if product.stock < item.quantity {
+            return Err(StatusCode::UNPROCESSABLE_ENTITY);
+        }
+
         let price = product.price.round_dp(2);
 
         verified.push(VerifiedItem {
@@ -62,9 +73,14 @@ async fn create_order(
         .map(|i| i.price * Decimal::from(i.quantity))
         .sum();
 
+    let kafka_items: Vec<OrderCreatedItem> = verified
+        .iter()
+        .map(|i| OrderCreatedItem { product_id: i.product_id, quantity: i.quantity })
+        .collect();
+
     let order = state
         .order_repo
-        .create_order(req.user_id, verified, total)
+        .create_order(user_id, verified, total)
         .await
         .map_err(|e| {
             tracing::error!("create_order db error: {e}");
@@ -80,6 +96,7 @@ async fn create_order(
     state.producer.order_created(&OrderCreatedEvent {
         order_id: order.id,
         user_id:  order.user_id,
+        items:    kafka_items,
     }).await;
 
     Ok((StatusCode::CREATED, Json(OrderResponse { order, items })))

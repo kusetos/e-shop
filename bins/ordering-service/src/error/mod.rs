@@ -13,6 +13,9 @@ pub enum OrderError {
     #[error("Product {0} not found in catalog")]
     ProductNotFound(i32),
 
+    #[error("Insufficient stock for product {0}")]
+    InsufficientStock(i32),
+
     #[error("Order not found")]
     NotFound,
 

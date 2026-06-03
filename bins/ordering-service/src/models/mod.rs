@@ -40,7 +40,6 @@ pub struct OrderResponse {
 // What the client sends — product IDs and quantities only, no prices
 #[derive(Debug, Deserialize)]
 pub struct CreateOrderRequest {
-    pub user_id: i32,
     pub items: Vec<OrderItemRequest>,
 }
 

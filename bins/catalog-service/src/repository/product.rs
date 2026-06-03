@@ -54,6 +54,17 @@ impl ProductRepository {
         .await
     }
 
+    pub async fn decrement_stock(&self, product_id: i32, quantity: i32) -> Result<(), sqlx::Error> {
+        sqlx::query!(
+            "UPDATE products SET stock = GREATEST(0, stock - $1) WHERE id = $2",
+            quantity,
+            product_id
+        )
+        .execute(&self.pool)
+        .await?;
+        Ok(())
+    }
+
     pub async fn delete_product_by_id(&self, id: i32) -> Result<u64, sqlx::Error> {
         let result = sqlx::query!("DELETE FROM products WHERE id = $1", id)
             .execute(&self.pool)

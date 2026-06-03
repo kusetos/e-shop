@@ -15,6 +15,7 @@ pub struct CatalogProduct {
     pub id: i32,
     pub name: String,
     pub price: rust_decimal::Decimal,
+    pub stock: i32,
 }
 
 impl CatalogClient {
