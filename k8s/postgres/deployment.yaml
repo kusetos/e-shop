@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: e-shop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres       # this Deployment manages Pods with label app=postgres
+  template:
+    metadata:
+      labels:
+        app: postgres     # every Pod created gets this label
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: "eshop"
+            - name: POSTGRES_DB
+              value: "catalog"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:           # read from Secret, not hardcoded
+                  name: e-shop-secret
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: init-sql
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: postgres-pvc     # use the PVC we created
+        - name: init-sql
+          configMap:
+            name: postgres-init         # mount init.sql from ConfigMap

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: basket-service
+  namespace: e-shop
+spec:
+  selector:
+    app: basket-service
+  ports:
+    - port: 3001
+      targetPort: 3001

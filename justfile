@@ -51,6 +51,9 @@ check:
 test:
     bash scripts/test.sh
 
+test-k8s:
+    bash scripts/test.sh "http://$(minikube ip):30080"
+
 catalog-db-open:
     harlequin -a postgres "postgres://eshop:eshop@localhost:5432/catalog"
 

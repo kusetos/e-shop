@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: e-shop
+data:
+  init.sql: |
+    CREATE DATABASE ordering;
+    CREATE DATABASE identity;

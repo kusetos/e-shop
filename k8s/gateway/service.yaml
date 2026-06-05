@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+  namespace: e-shop
+spec:
+  type: NodePort          # exposes the gateway on the minikube node's IP
+  selector:
+    app: gateway
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30080     # fixed external port — access at <minikube-ip>:30080

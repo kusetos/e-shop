@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-service
+  namespace: e-shop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: catalog-service
+  template:
+    metadata:
+      labels:
+        app: catalog-service
+    spec:
+      containers:
+        - name: catalog-service
+          image: e-shop-catalog-service:latest
+          imagePullPolicy: Never       # use local image, don't pull from Docker Hub
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: e-shop-config    # injects all keys from ConfigMap as env vars
+            - secretRef:
+                name: e-shop-secret    # injects all keys from Secret as env vars

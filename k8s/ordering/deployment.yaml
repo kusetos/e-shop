@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ordering-service
+  namespace: e-shop
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ordering-service
+  template:
+    metadata:
+      labels:
+        app: ordering-service
+    spec:
+      containers:
+        - name: ordering-service
+          image: e-shop-ordering-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3002
+          envFrom:
+            - configMapRef:
+                name: e-shop-config
+            - secretRef:
+                name: e-shop-secret
