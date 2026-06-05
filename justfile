@@ -48,6 +48,9 @@ sqlx-prepare:
 check:
     SQLX_OFFLINE=true cargo check --workspace
 
+test:
+    bash scripts/test.sh
+
 catalog-db-open:
     harlequin -a postgres "postgres://eshop:eshop@localhost:5432/catalog"
 

@@ -10,9 +10,9 @@ use axum::{
 
 pub fn create_router(state: AppState) -> Router {
     Router::new()
-        .route("/basket/:user_id", get(get_basket))
-        .route("/basket/:user_id", post(add_item))
-        .route("/basket/:user_id", delete(clear_basket))
-        .route("/basket/:user_id/:product_id", delete(remove_item))
+        .route("/api/basket/:user_id", get(get_basket))
+        .route("/api/basket/:user_id", post(add_item))
+        .route("/api/basket/:user_id", delete(clear_basket))
+        .route("/api/basket/:user_id/:product_id", delete(remove_item))
         .with_state(state)
 }
